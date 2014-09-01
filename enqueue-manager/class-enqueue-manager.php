@@ -16,10 +16,14 @@
  * 
  */
 
+//include dependent files
+include_once 'class-enqueue-script-item.php';
+include_once 'class-enqueue-style-item.php';
+
 
 /**
  * The Enqueue-Manaqer class is a static class through which users manipulate
- * their enqueued items @see Enqueue_Item.
+ * their enqueued items v@see Enqueue_Item.
  *
  * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
  * @version 1.0.0
@@ -112,12 +116,12 @@ class Enqueue_Manager {
         $is_enqueue = false; //enqueue this item when true
             
         //if not adding to admin, and this is admin, then bail -- don't add
-        if ( ! $item->get_add_to_admin && $post->is_admin() ){
+        if ( ! $item->get_in_admin && $post->is_admin() ){
             return;
         }
 
         //if not adding to front end, and this is front end, then bail
-        if ( ! $item->get_add_to_front_end && $post->is_admin()){
+        if ( ! $item->get_in_front_end && $post->is_admin()){
             return;
         }
 

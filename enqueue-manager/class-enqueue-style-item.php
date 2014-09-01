@@ -1,5 +1,8 @@
 <?php
 
+//include dependent file
+include_once( 'class-enqueue-item.php' );
+
 class Enqueue_Style_Item extends Enqueue_Item {
     
    /**
@@ -25,25 +28,25 @@ class Enqueue_Style_Item extends Enqueue_Item {
     * 
     * @url http://codex.wordpress.org/Function_Reference/wp_enqueue_style
     * 
-    * @param Boolean $add_to_admin
-    * @param Boolean $add_to_front_end
+    * @param  $in_admin
+    * @param  $in_front_end
     * @param array $add_to_pages
-    * @param String $handle
-    * @param String $src
+    * @param  $handle
+    * @param  $src
     * @param array $deps
-    * @param String $ver
-    * @param String $media
-    * 
+    * @param  $ver
+    * @param  $media
+    *
     * @access public
     * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
     * @version 1.0.0
     * @since 1.0.0
     */
-   function __construct(Boolean $add_to_admin, Boolean $add_to_front_end, 
-           Array $add_to_pages, String $handle, String $src, Array $deps, 
-           String $ver, String $media){
+   function __construct( $in_admin,  $in_front_end, 
+           array $add_to_pages, $handle, $src, array $deps, 
+           $ver, $media){
 
-       parent::__construct($add_to_admin, $add_to_front_end, $add_to_pages, 
+       parent::__construct($in_admin, $in_front_end, $add_to_pages, 
                $handle, $src, $deps, $ver);
        
        $this->media = $media;

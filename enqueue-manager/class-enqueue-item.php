@@ -12,6 +12,18 @@
 
 
 /**
+ * Here are some handy named constants to make using this class cleaner
+ */
+//$in_admin
+define('IN_ADMIN', true);
+define('NOT_IN_ADMIN', false);
+
+//$in_front_end
+define('IN_FRONT_END', true);
+define('NOT_IN_FRONT_END', false);
+
+
+/**
  * 
  * Enqueue Item
  * 
@@ -43,8 +55,8 @@ class Enqueue_Item {
     * @version 1.0.0
     * @since 1.0.0
     */
-   private $add_to_admin;
-   private $add_to_front_end;
+   private $in_admin;
+   private $in_front_end;
    private $add_to_pages;
    private $handle;
    private $src;
@@ -55,25 +67,25 @@ class Enqueue_Item {
     * 
     * Create an instance of an Enqueue_Item, setting all given parameters
     * 
-    * @param boolean $add_to_admin
-    * @param boolean $add_to_front_end
+    * @param  $in_admin
+    * @param  $in_front_end
     * @param array $add_to_pages
-    * @param string $handle
-    * @param string $src
-    * @param string $deps
-    * @param string $ver
+    * @param  $handle
+    * @param  $src
+    * @param array $deps
+    * @param  $ver
     * 
     * @access public
     * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
     * @version 1.0.0
     * @since 1.0.0
     */
-   function __construct(boolean $add_to_admin, boolean $add_to_front_end, 
-           array $add_to_pages, string $handle, string $src, string $deps, 
-           string $ver){
+   function __construct( $in_admin, $in_front_end, 
+           array $add_to_pages, $handle, $src, array $deps, 
+           $ver){
 
-       $this->add_to_admin = $add_to_admin;
-       $this->add_to_front_end = $add_to_front_end;
+       $this->in_admin = $in_admin;
+       $this->in_front_end = $in_front_end;
        $this->add_to_pages = $add_to_pages;
        $this->handle = $handle;
        $this->src = $src;
@@ -86,12 +98,12 @@ class Enqueue_Item {
        return $this->item_type;
    }
 
-   public function get_add_to_admin() {
-       return $this->add_to_admin;
+   public function get_in_admin() {
+       return $this->in_admin;
    }
 
-   public function get_add_to_front_end() {
-       return $this->add_to_front_end;
+   public function get_in_front_end() {
+       return $this->in_front_end;
    }
 
    public function get_add_to_pages() {
@@ -114,13 +126,13 @@ class Enqueue_Item {
        return $this->ver;
    }
    
-   public function set_add_to_admin(Boolean $add_to_admin) {
-       $this->add_to_admin = $add_to_admin;
+   public function set_in_admin(Boolean $in_admin) {
+       $this->in_admin = $in_admin;
        return $this;
    }
 
-   public function set_add_to_front_end($add_to_front_end) {
-       $this->add_to_front_end = $add_to_front_end;
+   public function set_in_front_end($in_front_end) {
+       $this->in_front_end = $in_front_end;
        return $this;
    }
 

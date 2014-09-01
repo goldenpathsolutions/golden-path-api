@@ -1,4 +1,17 @@
 <?php
+
+
+//include dependent file
+include_once( 'class-enqueue-item.php' );
+
+/**
+ * Here are some handy named constants to make using this class cleaner
+ */
+//$in_footer
+define('IN_FOOTER', true);
+define('NOT_IN_FOOTER', false);
+
+
 class Enqueue_Script_Item extends Enqueue_Item {
     
    /**
@@ -19,25 +32,25 @@ class Enqueue_Script_Item extends Enqueue_Item {
     * 
     * Create an instance of an Enqueue_Script_Item
     * 
-    * @param type $add_to_admin
-    * @param type $add_to_front_end
-    * @param type $add_to_pages
-    * @param type $handle
-    * @param type $src
-    * @param type $deps
-    * @param type $ver
-    * @param type $in_footer
+    * @param  $in_admin
+    * @param  $in_front_end
+    * @param array $add_to_pages
+    * @param  $handle
+    * @param  $src
+    * @param array $deps
+    * @param  $ver
+    * @param  $in_footer
     * 
     * @access public
     * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
     * @version 1.0.0
     * @since 1.0.0
     */
-   function __construct(boolean $add_to_admin, boolean $add_to_front_end, 
-           array $add_to_pages, string $handle, string $src, array $deps, 
-           string $ver, boolean $in_footer){
+   function __construct($in_admin, $in_front_end, 
+           array $add_to_pages, $handle, $src, array $deps, 
+           $ver, $in_footer){
 
-       parent::__construct($add_to_admin, $add_to_front_end, $add_to_pages, 
+       parent::__construct($in_admin, $in_front_end, $add_to_pages, 
                $handle, $src, $deps, $ver);
        
        $this->in_footer = $in_footer;
