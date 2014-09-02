@@ -35,7 +35,7 @@ define('NOT_IN_FRONT_END', false);
  * @version 1.0.0
  * @since   1.0.0
  */
-class Enqueue_Item {
+abstract class Enqueue_Item {
    
    /**
     * Indicates whether this item should be added to admin pages.
@@ -56,8 +56,13 @@ class Enqueue_Item {
     * @since 1.0.0
     */
    private $in_admin;
+   
+   /**
+    *
+    * @var boolean 
+    */
    private $in_front_end;
-   private $add_to_pages;
+   private $page_criteria;
    private $handle;
    private $src;
    private $deps;
@@ -67,9 +72,10 @@ class Enqueue_Item {
     * 
     * Create an instance of an Enqueue_Item, setting all given parameters
     * 
+    * @param WP_Post $post
     * @param  $in_admin
     * @param  $in_front_end
-    * @param array $add_to_pages
+    * @param array $page_criteria
     * @param  $handle
     * @param  $src
     * @param array $deps
@@ -81,12 +87,12 @@ class Enqueue_Item {
     * @since 1.0.0
     */
    function __construct( $in_admin, $in_front_end, 
-           array $add_to_pages, $handle, $src, array $deps, 
+           array $page_criteria, $handle, $src, array $deps, 
            $ver){
 
        $this->in_admin = $in_admin;
        $this->in_front_end = $in_front_end;
-       $this->add_to_pages = $add_to_pages;
+       $this->page_criteria = $page_criteria;
        $this->handle = $handle;
        $this->src = $src;
        $this->deps = $deps;
@@ -94,20 +100,22 @@ class Enqueue_Item {
 
    }
    
+   public abstract function enqueue();
+   
    public function get_item_type() {
        return $this->item_type;
    }
 
-   public function get_in_admin() {
+   public function in_admin() {
        return $this->in_admin;
    }
 
-   public function get_in_front_end() {
+   public function in_front_end() {
        return $this->in_front_end;
    }
 
-   public function get_add_to_pages() {
-       return $this->add_to_pages;
+   public function get_page_criteria() {
+       return $this->page_criteria;
    }
 
    public function get_handle() {
@@ -126,22 +134,22 @@ class Enqueue_Item {
        return $this->ver;
    }
    
-   public function set_in_admin(Boolean $in_admin) {
+   public function set_in_admin( $in_admin ) {
        $this->in_admin = $in_admin;
        return $this;
    }
 
-   public function set_in_front_end($in_front_end) {
+   public function set_in_front_end( $in_front_end ) {
        $this->in_front_end = $in_front_end;
        return $this;
    }
 
-   public function set_add_to_pages($add_to_pages) {
-       $this->add_to_pages = $add_to_pages;
+   public function set_page_criteria( $page_criteria ) {
+       $this->page_criteria = $page_criteria;
        return $this;
    }
 
-   public function set_handle($handle) {
+   public function set_handle( $handle ) {
        $this->handle = $handle;
        return $this;
    }

@@ -34,7 +34,7 @@ class Enqueue_Script_Item extends Enqueue_Item {
     * 
     * @param  $in_admin
     * @param  $in_front_end
-    * @param array $add_to_pages
+    * @param array $page_criteria
     * @param  $handle
     * @param  $src
     * @param array $deps
@@ -47,10 +47,10 @@ class Enqueue_Script_Item extends Enqueue_Item {
     * @since 1.0.0
     */
    function __construct($in_admin, $in_front_end, 
-           array $add_to_pages, $handle, $src, array $deps, 
+           array $page_criteria, $handle, $src, array $deps, 
            $ver, $in_footer){
 
-       parent::__construct($in_admin, $in_front_end, $add_to_pages, 
+       parent::__construct($in_admin, $in_front_end, $page_criteria, 
                $handle, $src, $deps, $ver);
        
        $this->in_footer = $in_footer;
@@ -64,4 +64,19 @@ class Enqueue_Script_Item extends Enqueue_Item {
        $this->in_footer = $in_footer;
        return $this;
    }
+    
+    public function enqueue_scripts_action(){
+        wp_enqueue_script( 
+            $this->get_handle(),
+            $this->get_src(),
+            $this->get_deps(),
+            $this->get_ver(),
+            $this->get_in_footer() 
+        );
+    }
+
+    public function enqueue() {
+        add_action( 'wp_enqueue_scripts', array( &$this, 'enqueue_scripts_action') );
+    }
+
 }

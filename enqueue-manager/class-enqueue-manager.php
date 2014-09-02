@@ -92,7 +92,7 @@ class Enqueue_Manager {
     public static function enqueue_items(){
                 
         foreach ( self::$items_to_enqueue as $item ){
-            enqueue_item( $item );
+            self::enqueue_item( $item );
         }
     }
     
@@ -101,7 +101,7 @@ class Enqueue_Manager {
      * Desides whether to enqueue given <code>Enqueue_Item</code>
      * 
      * 
-     * @global type $post
+     * @global WP_Post $post
      * @param Enqueue_Item $item
      * @return type
      * 
@@ -116,59 +116,63 @@ class Enqueue_Manager {
         $is_enqueue = false; //enqueue this item when true
             
         //if not adding to admin, and this is admin, then bail -- don't add
-        if ( ! $item->get_in_admin && $post->is_admin() ){
+        if ( $post && $post->is_admin() && ! $item->in_admin()  ){
             return;
         }
 
         //if not adding to front end, and this is front end, then bail
-        if ( ! $item->get_in_front_end && $post->is_admin()){
+        if ( $post && $post->is_font_end() && ! $item->in_front_end() ){
             return;
         }
 
-        //if no pages were specified, enqueue this item
-        if ( isEmpty( $item->add_to_pages ) ){
-            $is_enqueue = true;
+        /*
+         * If criteria were specified, test to see if we should enqueue.
+         * If no criteria were specified, then we are not limited and should 
+         * enqueue.
+         */
+        if ( !empty( $item->page_criteria ) ){
+            $is_enqueue = self::test_page_criteria( $item->page_criteria );
+            
         } else {
-
-            //if pages were specified, only add this item if this is the right page
-            foreach ( $item->add_to_pages as $page_slug ) {
-
-                if ( $post->get_slugh() == $page_slug ){
-                    $is_enqueue = true;
-                    break;                  //we only need one match to enqueue
-                }
-            }
+            $is_enqueue = true;         
         }
         
         if ( $is_enqueue ){
-            if ( get_class($item) == "Enqueue_Script_Item" ){
-                enqueue_script( $item );
-            }
-            
-            if( get_class($item) == "Enqueue_Style_Item" ){
-                enqueue_style( $item );
-            }
+            $item->enqueue();
         }
     }
     
-    protected function enqueue_script( Enqueue_Script_Item $item ){
-        wp_enqueue_script( 
-            $item->get_handle(),
-            $item->get_src(),
-            $item->get_deps(),
-            $item->get_ver(),
-            $item->get_in_footer() 
-        );
+    private static function test_page_criteria( array $page_criteria ){
+        
+        //if pages were specified, only add this item if this is the right page
+        foreach ( $page_criteria as $page_criterion ) {
+
+            $is_enqueue = self::test_page_criterion( $page_criterion );
+
+            if ( $is_enqueue ){
+                break;          //it only takes one success to add the item
+            }
+        }   
     }
     
-    protected function enqueue_style( Enqueue_Style_Item $item ){
-        wp_enqueue_style( 
-            $item->get_handle(),
-            $item->get_src(),
-            $item->get_deps(),
-            $item->get_ver(),
-            $item->get_media() 
-        );
+    private static function test_page_criterion( $page_criterion ){
+        
+        global $post;
+                
+        //handle case where $criteria is a page slug
+        if ( $post && ( $post->get_slug() == $page_criterion ) ){
+            return true;
+        }
+
+        /*
+         * case where $criteria is a function used to discern a special
+         * type of page such as is_search().
+         */
+        if ( is_callable( $page_criterion ) && __call( $page_criterion ) ){
+            return true;
+        }
+        
+        return false;
     }
 }
 
