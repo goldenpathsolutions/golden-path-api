@@ -195,7 +195,7 @@ class Enqueue_Manager {
          * returns true when criterion is slug of $post
          */
         $slug = substr( $page_criterion, ($last_slash + 1), strlen( $page_criterion ) );
-        if ( self::get_the_slug( $post->ID ) === $slug ){
+        if ( $post && self::get_the_slug( $post->ID ) === $slug ){
             return true;
         }
 
@@ -203,7 +203,7 @@ class Enqueue_Manager {
          * case where $criteria is a function used to discern a special
          * type of page such as is_search().
          */
-        if ( is_callable( $page_criterion ) && __call( $page_criterion ) ){
+        if ( is_callable( $page_criterion ) && call_user_func( $page_criterion ) ){
             return true;
         }
         
