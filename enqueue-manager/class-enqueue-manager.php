@@ -11,7 +11,7 @@
  * 
  * @package canned_fresh
  * @author  Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version 1.0.0
+ * @version 1.1.0
  * @created 2014-08-28
  * 
  */
@@ -55,8 +55,9 @@ class Enqueue_Manager {
      */
     public static function add_item( Enqueue_Item $item ){
         
-        if ( $item )
+        if ( $item ) {
             array_push( self::$items_to_enqueue, $item );
+        }
         
     }
     
@@ -100,29 +101,29 @@ class Enqueue_Manager {
      * 
      * Desides whether to enqueue given <code>Enqueue_Item</code>
      * 
-     * 
      * @global WP_Post $post
      * @param Enqueue_Item $item
-     * @return type
+     * @return boolean. False if item was not enqueued
      * 
      * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
-     * @version 1.0.0
-     * @since   1.0.0
+     * @version 1.1.0
+     * @since   1.1.0
      */
     protected static function enqueue_item( Enqueue_Item $item ){
-        
-        global $post;
-        
-        $is_enqueue = false; //enqueue this item when true
-            
-        //if not adding to admin, and this is admin, then bail -- don't add
-        if ( $post && $post->is_admin() && ! $item->in_admin()  ){
-            return;
-        }
-
-        //if not adding to front end, and this is front end, then bail
-        if ( $post && $post->is_font_end() && ! $item->in_front_end() ){
-            return;
+                                    
+        /*
+         * If this is admin, and we don't want to admin, then bail.
+         * If this is is front end (not admin), and we don't want to add to
+         * front end, then bail.
+         */
+        if ( is_admin() ){
+            if ( ! $item->in_admin() ){ // & don't add to admin
+                return false;
+            }
+        } else { // this is front end...
+            if ( ! $item->in_front_end() ){ // & don't add to front end
+                return false;
+            }
         }
 
         /*
@@ -130,37 +131,71 @@ class Enqueue_Manager {
          * If no criteria were specified, then we are not limited and should 
          * enqueue.
          */
-        if ( !empty( $item->page_criteria ) ){
-            $is_enqueue = self::test_page_criteria( $item->page_criteria );
-            
-        } else {
-            $is_enqueue = true;         
-        }
-        
-        if ( $is_enqueue ){
-            $item->enqueue();
-        }
-    }
-    
-    private static function test_page_criteria( array $page_criteria ){
-        
-        //if pages were specified, only add this item if this is the right page
-        foreach ( $page_criteria as $page_criterion ) {
-
-            $is_enqueue = self::test_page_criterion( $page_criterion );
-
-            if ( $is_enqueue ){
-                break;          //it only takes one success to add the item
+        $criteria = $item->get_page_criteria();
+        if ( ! empty( $criteria ) ){
+            if ( ! self::test_page_criteria( $criteria ) ){
+                return false;
             }
-        }   
+        }
+        
+        // enqueue the item
+        $item->enqueue();
     }
     
+    /**
+     * Loop through criteria. If any are met, return true, otherwise false
+     * 
+     * @param array $page_criteria
+     * @return boolean
+     * 
+     * @version 1.0.1
+     * @since 1.1.0
+     */
+    private static function test_page_criteria( array $page_criteria ){
+        foreach ( $page_criteria as $page_criterion ) {
+            if ( self::test_page_criterion( $page_criterion ) ){
+                return true;
+            }
+        }  
+        return false;
+    }
+    
+    /**
+     * 
+     * Run through the tests for the given criterion
+     * 
+     * @access private
+     * @global WP_Post $post
+     * @param type $page_criterion
+     * @return boolean True if tests pass, otherwise false
+     * 
+     * @version 1.1.0
+     * @since 1.1.0
+     */
     private static function test_page_criterion( $page_criterion ){
         
         global $post;
                 
-        //handle case where $criteria is a page slug
-        if ( $post && ( $post->get_slug() == $page_criterion ) ){
+        /*
+         * Test for, and handle case where page has a parent (ancestors) indicated 
+         * in the slug. Bails if there's a parent but it doesn't match this page, 
+         * otherwise continues testing
+         */
+        $last_slash = strrpos( $page_criterion, '/' );
+        if ( $last_slash !== false ) {  // if ancestor indicated in criterion...
+            // if ancestors fail to match the given list... 
+            $ancestor_string = substr( $page_criterion, 0, $last_slash );
+            if ( ! self::test_post_ancestors( $ancestor_string ) ){ 
+                return false;
+            }
+        }
+                        
+        /*
+         * Handle case where $post is any kind of post (page, post, custom), 
+         * returns true when criterion is slug of $post
+         */
+        $slug = substr( $page_criterion, ($last_slash + 1), strlen( $page_criterion ) );
+        if ( self::get_the_slug( $post->ID ) === $slug ){
             return true;
         }
 
@@ -173,6 +208,70 @@ class Enqueue_Manager {
         }
         
         return false;
+    }
+    
+    /**
+     * Tests whether the ancestors indicated by $ancestor_slug are $local_post's
+     * ancestors.  All must be in order.
+     * 
+     * String is assumed to consist of ancestor slugs separated by forward slashes.
+     * Example: <great-grandparent-slug>/<grandprent-slug>/<parent-slug>
+     * 
+     * @global WP_Post $post
+     * @param string $ancestors_slug
+     * @return boolean true if all ancestors represented in slug are the ancestors
+     *          of $local_post
+     */
+    private static function test_post_ancestors( $ancestors_slug = '' ){
+        global $post;
+        
+        /*
+         * Shouldn't happen, but if there are no ancestors indicated, then
+         * assume an ancestor search is not a criterion and therefore passes
+         */
+        if ( empty( $ancestors_slug ) ){
+            return true;
+        }
+        
+        /*
+         * get list of ancestor slugs.  If more than one, order them from parent 
+         * to oldest.  If only 
+         */
+        $ancestor_slugs = strrpos( $ancestors_slug, '/' ) !== false ? 
+                array_reverse( explode( '/', $ancestors_slug ) ) :
+                array ( $ancestors_slug );
+        $ancestor_ids = get_post_ancestors( $post );
+        $idx = 0; // keep track of which ancestor we're on. 0 = parent
+        
+        foreach ( $ancestor_ids as $ancestor_id ){
+            // fail as soon as we find a slug that doesn't match its ancestor
+            if ( self::get_the_slug( $ancestor_id ) !== $ancestor_slugs[ $idx++ ] ){
+                return false;
+            }
+        }
+        
+        return true; // ...if all ancestors match
+    }
+    
+    /**
+     * 
+     * Get the slug for the post with given id.
+     * 
+     * @global WP_Post $post
+     * @param int $id
+     * @return string The slug for given post id
+     */
+    private static function get_the_slug( $id=null ){
+        if( empty($id) ){
+            global $post;
+            if( empty($post) ){
+                return ''; // No global $post var available.
+            }
+            $id = $post->ID;
+        }
+
+        $slug = basename( get_permalink($id) );
+        return $slug;
     }
 }
 
