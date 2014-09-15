@@ -22,7 +22,7 @@
  * 
  * @category golden-path-api
  * @author: Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version: 1.0.0
+ * @version: 1.1.1
  * @copyright 2014 Golden Path Solutions, Inc.
  * @license http://opensource.org/licenses/GPL-2.0 GNU Public License, v2.0
  * 

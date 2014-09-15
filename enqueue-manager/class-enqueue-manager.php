@@ -11,7 +11,7 @@
  * 
  * @package canned_fresh
  * @author  Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version 1.1.0
+ * @version 1.1.1
  * @created 2014-08-28
  * 
  */
@@ -26,7 +26,7 @@ include_once 'class-enqueue-style-item.php';
  * their enqueued items v@see Enqueue_Item.
  *
  * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version 1.0.0
+ * @version 1.1.1
  * @since   1.0.0
  */
 class Enqueue_Manager {
@@ -169,8 +169,8 @@ class Enqueue_Manager {
      * @param type $page_criterion
      * @return boolean True if tests pass, otherwise false
      * 
-     * @version 1.1.0
-     * @since 1.1.0
+     * @version 1.1.1
+     * @since 1.1.1
      */
     private static function test_page_criterion( $page_criterion ){
         
