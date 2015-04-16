@@ -11,7 +11,8 @@
  * 
  * @package canned_fresh
  * @author  Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version 1.1.1
+ * @version 1.2.0
+ * @since   1.0.0
  * @created 2014-08-28
  * 
  */
@@ -23,7 +24,7 @@ include_once 'class-enqueue-style-item.php';
 
 /**
  * The Enqueue-Manaqer class is a static class through which users manipulate
- * their enqueued items v@see Enqueue_Item.
+ * their enqueued items @see Enqueue_Item.
  *
  * @author Patrick Jackson <pjackson@goldenpathsolutions.com>
  * @version 1.1.1
@@ -145,11 +146,17 @@ class Enqueue_Manager {
     /**
      * Loop through criteria. If any are met, return true, otherwise false
      * 
+     * Acceptable criteria:
+     * 1. "</parent-slug/page-slug>"
+     * 2. "<page-slug>"
+     * 3. "<post-type-slug>"
+     * 4. "<callable>" name of a function such as "is_search()"
+     * 
      * @param array $page_criteria
      * @return boolean
      * 
-     * @version 1.0.1
-     * @since 1.1.0
+     * @version 1.1.0
+     * @since 1.2.0
      */
     private static function test_page_criteria( array $page_criteria ){
         foreach ( $page_criteria as $page_criterion ) {
@@ -180,22 +187,36 @@ class Enqueue_Manager {
          * Test for, and handle case where page has a parent (ancestors) indicated 
          * in the slug. Bails if there's a parent but it doesn't match this page, 
          * otherwise continues testing
+         * 
+         * Only use slash if dealing with a parent page.
          */
         $last_slash = strrpos( $page_criterion, '/' );
         if ( $last_slash !== false ) {  // if ancestor indicated in criterion...
+            // DEBUG: echo "<P>TESTING PARENT</P>";
             // if ancestors fail to match the given list... 
             $ancestor_string = substr( $page_criterion, 0, $last_slash );
             if ( ! self::test_post_ancestors( $ancestor_string ) ){ 
                 return false;
             }
         }
+        
+        /*
+         * Look for post type slug
+         * 
+         * Don't use slash if testing for post type
+         */
+        // DEBUG: echo "<P>testing post type: " . $page_criterion . " ==? " . get_post_type( $post->ID ) . "</P>";
+        if ( $post && get_post_type( $post->ID ) === $page_criterion ){
+            return true;
+        }
                         
         /*
-         * Handle case where $post is any kind of post (page, post, custom), 
-         * returns true when criterion is slug of $post
+         * Look for this post's slug
+         * 
+         * Don't use slash if testing for post type
          */
-        $slug = substr( $page_criterion, ($last_slash + 1), strlen( $page_criterion ) );
-        if ( $post && self::get_the_slug( $post->ID ) === $slug ){
+        // DEBUG: echo "<P>testing page slug: " . $page_criterion . " ==? " . self::get_the_slug( $post->ID ) . "</P>";
+        if ( $post && self::get_the_slug( $post->ID ) === $page_criterion ){
             return true;
         }
 

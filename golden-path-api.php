@@ -6,7 +6,7 @@
  * Description: This plugin contains a number of useful tools and functions for
  *              developers.  See inline documentation for details.
  * Author: Patrick Jackson <pjackson@goldenpathsolutions.com>
- * Version: 1.0.0
+ * Version: 1.2.0
  * Author URI: http://www.goldenpathsolutions.com
  * Text Domain: gps-api
  * 
@@ -22,7 +22,7 @@
  * 
  * @category golden-path-api
  * @author: Patrick Jackson <pjackson@goldenpathsolutions.com>
- * @version: 1.1.1
+ * @version: 1.2.0
  * @copyright 2014 Golden Path Solutions, Inc.
  * @license http://opensource.org/licenses/GPL-2.0 GNU Public License, v2.0
  * 
